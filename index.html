@@ -5,8 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0d1117">
 <title>SIC Enterprise</title>
-<link rel="stylesheet" href="style.css">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="./manifest.json">
+
+<!-- PWA Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<!-- iOS Meta -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SIC Enterprise">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="SIC Enterprise">
+
+<!-- Styles -->
+<link rel="stylesheet" href="./style.css">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Libraries -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -63,6 +82,7 @@
     <span class="logo-text" id="logoText">SIC <small>Enterprise</small></span>
   </div>
   <div class="header-right">
+    <button class="theme-btn" id="installBtn" style="display:none;" title="تثبيت التطبيق">📲</button>
     <span class="user-badge" id="userBadge">👤</span>
     <span class="status-badge"><span class="dot"></span> متصل</span>
     <button class="theme-btn" id="themeBtn">🌙</button>
@@ -580,7 +600,7 @@
 
 </main>
 
-<!-- M O D A L S -->
+<!-- MODALS -->
 
 <div class="modal" id="scannerModal">
   <div class="modal-box">
@@ -659,7 +679,22 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+<!-- PWA Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((registration) => {
+          console.log('✅ SW registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.warn('❌ SW registration failed:', error);
+        });
+    });
+  }
+</script>
+
+<script src="./data.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
