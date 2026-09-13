@@ -28,6 +28,11 @@ jobs:
       - name: 🤖 Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: 📦 Install Capacitor
         run: |
           npm install
@@ -43,8 +48,15 @@ jobs:
       - name: 🔐 Add Camera Permissions
         run: python3 .github/add-permissions.py
 
-      - name: 🎨 Generate SIC Icons (with Python)
+      - name: 🎨 Generate SIC App Icons
         run: python3 .github/generate-icons.py
+
+      - name: 📝 Verify Icons
+        run: |
+          echo "=== Verifying icons ==="
+          ls -la android/app/src/main/res/mipmap-hdpi/
+          ls -la android/app/src/main/res/mipmap-xxxhdpi/
+          echo "=== Done ==="
 
       - name: 🔨 Build APK
         working-directory: android
