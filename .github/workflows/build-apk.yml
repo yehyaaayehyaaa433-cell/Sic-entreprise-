@@ -31,7 +31,7 @@ jobs:
       - name: 📦 Install Capacitor
         run: |
           npm install
-          npm install @capacitor/core @capacitor/android
+          npm install @capacitor/core @capacitor/android @capacitor/assets
           npm install -g @capacitor/cli
 
       - name: 🔧 Add Android
@@ -43,37 +43,8 @@ jobs:
       - name: 🔐 Add Camera Permissions
         run: python3 .github/add-permissions.py
 
-      - name: 🎨 Apply SIC Icons and Name
-        run: |
-          echo "=== Applying SIC Enterprise icons ==="
-
-          # الأيقونات المربعة
-          cp www/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-          cp www/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          cp www/icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-          cp www/icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-          cp www/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-
-          # الأيقونات الدائرية
-          cp www/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
-          cp www/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
-          cp www/icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
-          cp www/icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
-          cp www/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
-
-          # أيقونة داخل التطبيق
-          mkdir -p android/app/src/main/res/drawable
-          cp www/icon-192.png android/app/src/main/res/drawable/splash.png
-
-          # تغيير اسم التطبيق
-          if [ -f android/app/src/main/res/values/strings.xml ]; then
-            sed -i 's|<string name="app_name">.*</string>|<string name="app_name">SIC Enterprise</string>|' android/app/src/main/res/values/strings.xml
-            sed -i 's|<string name="title_activity_main">.*</string>|<string name="title_activity_main">SIC Enterprise</string>|' android/app/src/main/res/values/strings.xml
-          fi
-
-          echo "=== Verify icons ==="
-          ls -la android/app/src/main/res/mipmap-hdpi/
-          echo "=== Done! ==="
+      - name: 🎨 Generate SIC Icons (with Python)
+        run: python3 .github/generate-icons.py
 
       - name: 🔨 Build APK
         working-directory: android
@@ -84,5 +55,5 @@ jobs:
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SIC-Enterprise-APK-v3
+          name: SIC-Enterprise-APK-v4
           path: android/app/build/outputs/apk/debug/*.apk
