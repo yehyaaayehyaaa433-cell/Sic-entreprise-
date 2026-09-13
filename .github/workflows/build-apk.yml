@@ -17,10 +17,10 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: ☕ Setup Java JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -40,6 +40,35 @@ jobs:
       - name: 🔄 Sync Capacitor
         run: npx cap sync android
 
+      - name: 🔐 Add Camera & Storage Permissions
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          
+          # إضافة أذونات الكاميرا والملفات
+          PERMISSIONS='    <uses-permission android:name="android.permission.CAMERA" />
+              <uses-feature android:name="android.hardware.camera" android:required="false" />
+              <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+          '
+          
+          # إدراج الأذونات قبل وسم </manifest>
+          sed -i "s|</manifest>|${PERMISSIONS}</manifest>|" "$MANIFEST"
+          
+          # عرض النتيجة
+          echo "=== AndroidManifest.xml ==="
+          cat "$MANIFEST"
+
+      - name: 🎨 Set App Icons and Name
+        run: |
+          # تغيير اسم التطبيق
+          sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">SIC Enterprise<\/string>/' android/app/src/main/res/values/strings.xml
+          
+          # تغيير اسم الحزمة في strings
+          cat android/app/src/main/res/values/strings.xml
+
       - name: 🔨 Build Debug APK
         working-directory: android
         run: |
@@ -49,5 +78,5 @@ jobs:
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SIC-Enterprise-APK
+          name: SIC-Enterprise-APK-v2
           path: android/app/build/outputs/apk/debug/*.apk
