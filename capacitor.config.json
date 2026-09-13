@@ -1,0 +1,14 @@
+{
+  "appId": "com.sic.enterprise",
+  "appName": "SIC Enterprise",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
