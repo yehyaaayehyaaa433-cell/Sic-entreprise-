@@ -28,48 +28,22 @@ jobs:
       - name: 🤖 Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install Capacitor
         run: |
           npm install
           npm install @capacitor/core @capacitor/android
           npm install -g @capacitor/cli
 
-      - name: 🔧 Add Android platform
+      - name: 🔧 Add Android
         run: npx cap add android
 
-      - name: 🔄 Sync Capacitor
+      - name: 🔄 Sync
         run: npx cap sync android
 
-      - name: 🔐 Add Camera & Storage Permissions
-        run: |
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-          
-          # إضافة أذونات الكاميرا والملفات
-          PERMISSIONS='    <uses-permission android:name="android.permission.CAMERA" />
-              <uses-feature android:name="android.hardware.camera" android:required="false" />
-              <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-          '
-          
-          # إدراج الأذونات قبل وسم </manifest>
-          sed -i "s|</manifest>|${PERMISSIONS}</manifest>|" "$MANIFEST"
-          
-          # عرض النتيجة
-          echo "=== AndroidManifest.xml ==="
-          cat "$MANIFEST"
+      - name: 🔐 Add Camera Permissions
+        run: python3 .github/add-permissions.py
 
-      - name: 🎨 Set App Icons and Name
-        run: |
-          # تغيير اسم التطبيق
-          sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">SIC Enterprise<\/string>/' android/app/src/main/res/values/strings.xml
-          
-          # تغيير اسم الحزمة في strings
-          cat android/app/src/main/res/values/strings.xml
-
-      - name: 🔨 Build Debug APK
+      - name: 🔨 Build APK
         working-directory: android
         run: |
           chmod +x ./gradlew
