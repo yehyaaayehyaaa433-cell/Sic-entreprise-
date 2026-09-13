@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<title>SIC Enterprise</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="./manifest.json">
+
+<!-- PWA Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<!-- iOS Meta -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SIC Enterprise">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="SIC Enterprise">
+
+<!-- Styles -->
+<link rel="stylesheet" href="./style.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Libraries -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- شاشة التفعيل -->
+<div id="activationScreen" class="activation-screen hidden">
+  <div class="activation-box">
+    <span class="activation-icon">🔒</span>
+    <h1>انتهت فترة التجربة</h1>
+    <p id="activationMsg">انتهت 10 أيام التجربة المجانية</p>
+    <div class="activation-code-display" id="activationCodeDisplay"></div>
+    <p class="activation-hint">أرسل الكود أعلاه للمطور للحصول على كود التفعيل</p>
+    <input type="text" id="activationInput" placeholder="أدخل كود التفعيل" autocomplete="off">
+    <button class="btn primary full" id="activationBtn">🔓 تفعيل التطبيق</button>
+    <small id="activationError" class="login-error"></small>
+    <div class="activation-footer"><small>© SIC Enterprise</small></div>
+  </div>
+</div>
+
+<!-- شاشة تسجيل الدخول -->
+<div id="loginScreen" class="login-screen hidden">
+  <div class="login-box">
+    <span class="login-logo">◆</span>
+    <h1>SIC Enterprise</h1>
+    <p>نظام إدارة المحلات</p>
+
+    <div id="pinView" style="display:none;">
+      <p style="margin-bottom:16px;color:var(--muted);font-size:13px;">أدخل الرمز السري</p>
+      <input type="password" id="loginPin" placeholder="● ● ● ●" maxlength="4" inputmode="numeric" autocomplete="off">
+      <button class="btn primary full" id="pinLoginBtn">🔓 دخول</button>
+      <button class="btn" id="switchToUser" style="background:var(--muted);margin-top:8px;width:100%;">استخدام اسم المستخدم</button>
+    </div>
+
+    <div id="userView">
+      <input type="text" id="loginUser" placeholder="اسم المستخدم" autocomplete="off">
+      <input type="password" id="loginPass" placeholder="كلمة المرور" autocomplete="off">
+      <button class="btn primary full" id="userLoginBtn">🔓 دخول</button>
+      <button class="btn" id="switchToPin" style="background:var(--card2);color:var(--text);margin-top:8px;width:100%;">استخدام الرمز السري</button>
+      <button class="btn" id="fingerprintBtn" style="background:var(--card2);color:var(--text);margin-top:8px;width:100%;display:none;">👆 بصمة الإصبع</button>
+    </div>
+
+    <small id="loginError" class="login-error"></small>
+    <small class="login-hint">افتراضي: <b>admin</b> / <b>1234</b></small>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <div class="logo">
+    <span class="logo-icon" id="logoIcon">◆</span>
+    <span class="logo-text" id="logoText">SIC <small>Enterprise</small></span>
+  </div>
+  <div class="header-right">
+    <button class="theme-btn" id="installBtn" style="display:none;" title="تثبيت التطبيق">📲</button>
+    <span class="user-badge" id="userBadge">👤</span>
+    <span class="status-badge"><span class="dot"></span> متصل</span>
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<!-- SIDE DRAWER -->
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="logo-icon">◆</span>
+    <h3 id="drawerCompanyName">SIC Enterprise</h3>
+    <p id="drawerUser">مرحباً</p>
+    <small id="drawerTrial" class="drawer-trial" style="display:none;"></small>
+  </div>
+  <nav class="drawer-nav">
+    <a href="#" data-page="dashboard">🏠 الرئيسية</a>
+    <a href="#" data-page="pos">🛒 نقطة البيع</a>
+    <a href="#" data-page="inventory">📦 المخزون</a>
+    <a href="#" data-page="customers">👥 الزبائن</a>
+    <a href="#" data-page="suppliers">🏭 الموردين</a>
+    <a href="#" data-page="treasury">💰 الخزينة</a>
+    <a href="#" data-page="invoices">🧾 الفواتير</a>
+    <a href="#" data-page="stats">📊 الإحصائيات</a>
+    <a href="#" data-page="backup">💾 النسخ الاحتياطي</a>
+    <a href="#" data-page="settings">⚙️ الإعدادات</a>
+    <a href="#" data-page="users" class="admin-only">👤 المستخدمين</a>
+  </nav>
+  <div class="drawer-footer">
+    <button class="btn danger full" id="logoutBtn" style="margin-bottom:10px;">🚪 تسجيل خروج</button>
+    <small id="drawerVersion">v1.0.0 © SIC Enterprise</small>
+  </div>
+</aside>
+<div class="overlay" id="overlay"></div>
+
+<!-- MAIN -->
+<main class="container" id="app">
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <div class="dash-header-card">
+      <div class="dash-greeting">
+        <small id="dashGreeting">مرحباً</small>
+        <h2 id="dashCompany">SIC Enterprise</h2>
+      </div>
+      <div class="dash-date" id="dashDate"></div>
+    </div>
+
+    <div class="dash-balance">
+      <span>💰 رصيد الخزينة</span>
+      <h1 id="dashBalance">0.00 دج</h1>
+    </div>
+
+    <div class="dash-mini-stats">
+      <div class="mini-stat">
+        <small>مبيعات اليوم</small>
+        <b id="dashTodaySales">0</b>
+      </div>
+      <div class="mini-stat">
+        <small>مصاريف اليوم</small>
+        <b id="dashTodayExp">0</b>
+      </div>
+      <div class="mini-stat">
+        <small>عدد المنتجات</small>
+        <b id="dashProducts">0</b>
+      </div>
+    </div>
+
+    <div id="lowStockAlerts" class="alerts-box"></div>
+
+    <h2 class="section-title">الإدارة السريعة</h2>
+    <div class="grid">
+      <div class="grid-card" data-page="pos"><span>🛒</span><p>نقطة البيع</p></div>
+      <div class="grid-card" data-page="inventory"><span>📦</span><p>المخزون</p></div>
+      <div class="grid-card" data-page="customers"><span>👥</span><p>الزبائن</p></div>
+      <div class="grid-card" data-page="suppliers"><span>🏭</span><p>الموردين</p></div>
+      <div class="grid-card" data-page="stats"><span>📊</span><p>الإحصائيات</p></div>
+      <div class="grid-card" data-page="settings"><span>⚙️</span><p>الإعدادات</p></div>
+      <div class="grid-card" data-page="backup"><span>💾</span><p>نسخ احتياطي</p></div>
+    </div>
+  </section>
+
+  <!-- POS -->
+  <section class="page" id="page-pos">
+    <h2 class="page-title">🛒 نقطة البيع</h2>
+
+    <div class="pos-total-screen">
+      <div class="pos-total-label">المجموع</div>
+      <div class="pos-total-value" id="posGrandTotal">0.00</div>
+      <div class="pos-articles-count">📦 <b id="posArticlesCount">0</b> منتج</div>
+    </div>
+
+    <div class="pos-search-row">
+      <input type="text" id="posQuickSearch" placeholder="🔍 بحث بالاسم أو الباركود..." autocomplete="off">
+      <button class="icon-btn primary" id="openScannerPOS" title="مسح باركود">📷</button>
+    </div>
+
+    <div class="pos-suggestions" id="posSuggestions"></div>
+
+    <div class="pos-add-row">
+      <select id="posProduct"></select>
+      <input type="number" id="posQty" placeholder="كمية" value="1" min="1">
+      <button class="btn primary" id="addToCart">➕</button>
+    </div>
+
+    <div class="pos-cart-list" id="cartList"></div>
+
+    <div class="pay-row">
+      <label><input type="radio" name="payType" value="cash" checked> 💵 نقدي</label>
+      <label><input type="radio" name="payType" value="credit"> 💳 كريدي</label>
+    </div>
+
+    <div id="creditCustomerBox" style="display:none;">
+      <select id="posCustomer"></select>
+    </div>
+
+    <div class="pos-actions-grid">
+      <button class="pos-action-btn" id="posBtnHistory">📋<small>السجل</small></button>
+      <button class="pos-action-btn" id="posBtnClear">🗑️<small>تفريغ</small></button>
+      <button class="pos-action-btn" id="posBtnNew">🆕<small>جديد</small></button>
+      <button class="pos-action-btn primary" id="posBtnValidate">✅<small>تأكيد</small></button>
+    </div>
+
+    <button class="btn success full" id="checkoutBtn" style="margin-top:14px;">💾 حفظ وطباعة الفاتورة</button>
+  </section>
+
+  <!-- INVENTORY -->
+  <section class="page" id="page-inventory">
+    <h2 class="page-title">📦 المخزون</h2>
+
+    <div class="inv-toolbar">
+      <button class="icon-btn" id="openScanner" title="مسح باركود">📷</button>
+      <input type="text" id="searchProduct" placeholder="🔍 بحث..." class="search-input-inline">
+      <button class="icon-btn" id="invExport" title="تصدير CSV">📤</button>
+    </div>
+
+    <button class="btn primary full" id="toggleAddProduct" style="margin-bottom:12px;">➕ إضافة منتج</button>
+
+    <div class="inv-add-panel" id="invAddPanel" style="display:none;">
+
+      <div class="mode-tabs" id="modeTabs">
+        <button class="mode-tab active" data-source="manual">✍️ إضافة فقط</button>
+        <button class="mode-tab" data-source="supplier">🚚 شراء من مورد</button>
+      </div>
+
+      <h3 class="form-section-title">📋 بيانات أساسية</h3>
+      <div class="form-row"><label>الباركود</label><input type="text" id="prodBarcode" placeholder="امسح أو اكتب"></div>
+      <div class="form-row"><label>اسم المنتج *</label><input type="text" id="prodName" placeholder="التعيين"></div>
+      <div class="form-row"><label>Référence</label><input type="text" id="prodRef" placeholder="مرجع"></div>
+
+      <h3 class="form-section-title">💰 الأسعار</h3>
+      <div class="form-row"><label>سعر الشراء</label><input type="number" id="prodBuy" placeholder="0.00"></div>
+      <div class="form-row"><label>سعر البيع *</label><input type="number" id="prodSell" placeholder="0.00"></div>
+      <div class="form-row"><label>سعر الجملة</label><input type="number" id="prodSemiGros" placeholder="0.00"></div>
+
+      <h3 class="form-section-title">📦 الكميات</h3>
+      <div class="form-row"><label>الكمية *</label><input type="number" id="prodQty" placeholder="0"></div>
+      <div class="form-row"><label>الكمية الدنيا</label><input type="number" id="prodMinQty" placeholder="5" value="5"></div>
+
+      <div id="supplierPurchaseBox" style="display:none;">
+        <h3 class="form-section-title">🏭 بيانات المورد</h3>
+        <div class="form-row"><label>المورد *</label><select id="prodSupplier" class="form-select"></select></div>
+        <div class="form-row"><label>سعر الشراء للوحدة *</label><input type="number" id="prodPurPrice" placeholder="0.00"></div>
+        <div class="pay-row">
+          <label><input type="radio" name="purPayType" value="cash" checked> 💵 نقدي</label>
+          <label><input type="radio" name="purPayType" value="credit"> 💳 كريدي</label>
+        </div>
+      </div>
+
+      <h3 class="form-section-title">📅 متقدم</h3>
+      <div class="form-row"><label>تاريخ الصلاحية</label><input type="date" id="prodExpiry"></div>
+
+      <button class="btn primary full" id="addProduct">💾 حفظ المنتج</button>
+    </div>
+
+    <div class="inv-table-wrap">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>كود</th>
+            <th>المنتج</th>
+            <th>شراء</th>
+            <th>بيع</th>
+            <th>كمية</th>
+            <th>المورد</th>
+            <th>الصلاحية</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="productList"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section class="page" id="page-customers">
+    <h2 class="page-title">👥 الزبائن</h2>
+
+    <div class="inv-toolbar">
+      <input type="text" id="searchCustomer" placeholder="🔍 بحث..." class="search-input-inline">
+      <button class="icon-btn" id="custExport" title="تصدير">📤</button>
+    </div>
+
+    <div class="cust-summary">
+      <div class="cust-sum-card"><small>إجمالي الزبائن</small><b id="custCount">0</b></div>
+      <div class="cust-sum-card warn"><small>عليهم دين</small><b id="custWithDebt">0</b></div>
+      <div class="cust-sum-card danger"><small>إجمالي الديون</small><b id="custTotalDebt">0</b></div>
+    </div>
+
+    <button class="btn primary full" id="toggleAddCustomer" style="margin-bottom:12px;">➕ إضافة زبون</button>
+
+    <div class="inv-add-panel" id="custAddPanel" style="display:none;">
+      <h3 class="form-section-title" id="custFormTitle">📋 بيانات الزبون</h3>
+      <div class="form-row"><label>الاسم *</label><input type="text" id="custName"></div>
+      <div class="form-row"><label>رقم الهاتف</label><input type="tel" id="custPhone"></div>
+      <div class="form-row"><label>الدين الافتتاحي</label><input type="number" id="custDebt" value="0"></div>
+      <div class="form-row"><label>حد الائتمان</label><input type="number" id="custCreditLimit" value="0"></div>
+      <div class="form-row"><label>ملاحظات</label><input type="text" id="custNotes"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn primary full" id="saveCustomerBtn">💾 حفظ</button>
+        <button class="btn danger full" id="cancelCustomerBtn" style="display:none;">إلغاء</button>
+      </div>
+    </div>
+
+    <div class="cust-list" id="customerList"></div>
+  </section>
+
+  <!-- SUPPLIERS -->
+  <section class="page" id="page-suppliers">
+    <h2 class="page-title">🏭 الموردين</h2>
+
+    <div class="inv-toolbar">
+      <input type="text" id="searchSupplier" placeholder="🔍 بحث..." class="search-input-inline">
+      <button class="icon-btn" id="supExport" title="تصدير">📤</button>
+    </div>
+
+    <div class="cust-summary">
+      <div class="cust-sum-card"><small>عدد الموردين</small><b id="supCount">0</b></div>
+      <div class="cust-sum-card warn"><small>علينا لهم دين</small><b id="supWithDebt">0</b></div>
+      <div class="cust-sum-card danger"><small>إجمالي ما علينا</small><b id="supTotalDebt">0</b></div>
+    </div>
+
+    <button class="btn primary full" id="toggleAddSupplier" style="margin-bottom:12px;">➕ إضافة مورد</button>
+
+    <div class="inv-add-panel" id="supAddPanel" style="display:none;">
+      <h3 class="form-section-title" id="supFormTitle">📋 بيانات المورد</h3>
+      <div class="form-row"><label>الاسم *</label><input type="text" id="supName"></div>
+      <div class="form-row"><label>رقم الهاتف</label><input type="tel" id="supPhone"></div>
+      <div class="form-row"><label>العنوان</label><input type="text" id="supAddress"></div>
+      <div class="form-row"><label>الدين الافتتاحي</label><input type="number" id="supDebt" value="0"></div>
+      <div class="form-row"><label>ملاحظات</label><input type="text" id="supNotes"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn primary full" id="saveSupplierBtn">💾 حفظ</button>
+        <button class="btn danger full" id="cancelSupplierBtn" style="display:none;">إلغاء</button>
+      </div>
+    </div>
+
+    <div class="cust-list" id="supplierList"></div>
+  </section>
+
+  <!-- TREASURY -->
+  <section class="page" id="page-treasury">
+    <h2 class="page-title">💰 الخزينة</h2>
+
+    <div class="treasury-simple">
+      <span>الرصيد الحالي</span>
+      <h1 id="treasuryBalance">0.00 دج</h1>
+    </div>
+
+    <div id="treasuryAlert" class="treasury-alert" style="display:none;"></div>
+
+    <div class="inv-toolbar">
+      <input type="text" id="searchTreasury" placeholder="🔍 بحث..." class="search-input-inline">
+      <button class="icon-btn" id="treasuryExport" title="تصدير">📤</button>
+    </div>
+
+    <div class="treasury-filters">
+      <select id="treasuryPeriod">
+        <option value="all">الكل</option>
+        <option value="today">اليوم</option>
+        <option value="week">الأسبوع</option>
+        <option value="month">الشهر</option>
+      </select>
+      <select id="treasuryType">
+        <option value="all">الكل</option>
+        <option value="in">دخل فقط</option>
+        <option value="out">خرج فقط</option>
+      </select>
+    </div>
+
+    <button class="btn warning full" id="adjustBalanceBtn" style="margin-bottom:12px;">✏️ تعديل يدوي للرصيد</button>
+
+    <div class="list" id="treasuryList"></div>
+  </section>
+
+  <!-- INVOICES -->
+  <section class="page" id="page-invoices">
+    <h2 class="page-title">🧾 الفواتير</h2>
+    <div class="inv-toolbar">
+      <input type="text" id="searchInvoice" placeholder="🔍 بحث..." class="search-input-inline">
+      <select id="invoiceFilter" style="padding:10px;border-radius:10px;background:var(--card);color:var(--text);border:1px solid var(--border);font-family:inherit;font-size:13px;">
+        <option value="all">الكل</option>
+        <option value="cash">نقدي</option>
+        <option value="credit">كريدي</option>
+      </select>
+    </div>
+    <div class="list" id="invoiceList"></div>
+  </section>
+
+  <!-- STATS -->
+  <section class="page" id="page-stats">
+    <h2 class="page-title">📊 الإحصائيات</h2>
+
+    <div class="date-range-box">
+      <div class="form-row">
+        <label>من تاريخ</label>
+        <input type="date" id="statsFrom">
+      </div>
+      <div class="form-row">
+        <label>إلى تاريخ</label>
+        <input type="date" id="statsTo">
+      </div>
+      <div class="date-quick-tabs">
+        <button class="date-quick active" data-range="today">اليوم</button>
+        <button class="date-quick" data-range="week">الأسبوع</button>
+        <button class="date-quick" data-range="month">الشهر</button>
+        <button class="date-quick" data-range="year">السنة</button>
+      </div>
+    </div>
+
+    <div class="report-summary">
+      <div class="rep-card"><small>المبيعات</small><b id="repSales">0</b></div>
+      <div class="rep-card"><small>المشتريات</small><b id="repPur">0</b></div>
+      <div class="rep-card"><small>تسديدات الموردين</small><b id="repSupPay">0</b></div>
+      <div class="rep-card highlight"><small>الربح الصافي</small><b id="repProfit">0</b></div>
+      <div class="rep-card"><small>عدد الفواتير</small><b id="repInvoices">0</b></div>
+      <div class="rep-card"><small>متوسط الفاتورة</small><b id="repAvg">0</b></div>
+      <div class="rep-card"><small>ديون جديدة</small><b id="repNewDebts">0</b></div>
+      <div class="rep-card"><small>ديون محصلة</small><b id="repPaid">0</b></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>📈 المبيعات مقابل المشتريات</h3>
+      <canvas id="chartMain"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>📊 المبيعات حسب الفترة</h3>
+      <canvas id="chartBar"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>🥧 توزيع طرق الدفع</h3>
+      <canvas id="chartPie"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>🏆 أفضل 5 منتجات</h3>
+      <div class="list" id="topProducts"></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>📉 الربح حسب الفترة</h3>
+      <canvas id="chartProfit"></canvas>
+    </div>
+
+    <h3 class="section-title">📜 سجل العمليات</h3>
+    <div class="inv-toolbar">
+      <select id="logFilter" style="flex:1;padding:10px;border-radius:10px;background:var(--card);color:var(--text);border:1px solid var(--border);font-family:inherit;font-size:13px;">
+        <option value="all">كل العمليات</option>
+        <option value="sale">المبيعات</option>
+        <option value="purchase">المشتريات</option>
+        <option value="payment">التسديدات</option>
+      </select>
+      <button class="icon-btn" id="logExport" title="تصدير">📤</button>
+    </div>
+    <div class="list" id="activityLog"></div>
+  </section>
+
+  <!-- BACKUP -->
+  <section class="page" id="page-backup">
+    <h2 class="page-title">💾 النسخ الاحتياطي</h2>
+
+    <div class="backup-info">
+      <span>آخر نسخة احتياطية</span>
+      <b id="lastBackupDate">لم تُنجَز بعد</b>
+    </div>
+
+    <div class="backup-actions">
+      <button class="btn primary full" id="backupExport">📤 تصدير نسخة (JSON)</button>
+      <button class="btn success full" id="backupImport">📥 استيراد نسخة</button>
+      <button class="btn warning full" id="backupAutoToggle">🔄 النسخ التلقائي الأسبوعي</button>
+      <button class="btn primary full" id="backupExcel">📊 تصدير Excel (منتجات/زبائن/فواتير)</button>
+      <button class="btn danger full" id="backupReset">🗑️ مسح كل البيانات</button>
+    </div>
+
+    <input type="file" id="backupFileInput" accept=".json" style="display:none;">
+
+    <div class="backup-hint">
+      <h4>💡 نصائح</h4>
+      <ul>
+        <li>صدّر نسخة احتياطية كل أسبوع</li>
+        <li>احفظ الملف في Google Drive أو إيميل</li>
+        <li>النسخ التلقائي يعمل عند فتح التطبيق</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="page" id="page-settings">
+    <h2 class="page-title">⚙️ الإعدادات</h2>
+
+    <div class="settings-section">
+      <h3 class="settings-title">🏢 معلومات المؤسسة</h3>
+      <div class="form-row"><label>اسم المحل</label><input type="text" id="setCompanyName"></div>
+      <div class="form-row"><label>الشعار (نص)</label><input type="text" id="setLogo" placeholder="◆"></div>
+      <div class="form-row"><label>رقم الهاتف</label><input type="tel" id="setPhone"></div>
+      <div class="form-row"><label>البريد الإلكتروني</label><input type="email" id="setEmail"></div>
+      <div class="form-row"><label>العنوان</label><input type="text" id="setAddress"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3 class="settings-title">🧾 إعدادات الفاتورة</h3>
+      <div class="form-row">
+        <label>حجم الورق</label>
+        <select id="setPaperSize" class="form-select">
+          <option value="80mm">80mm (شائع)</option>
+          <option value="58mm">58mm (صغير)</option>
+          <option value="A4">A4</option>
+        </select>
+      </div>
+      <div class="form-row"><label>نص أسفل الفاتورة</label><input type="text" id="setReceiptFooter" placeholder="شكراً لتعاملكم معنا"></div>
+      <div class="form-row"><label>رقم الفاتورة التسلسلي</label><input type="number" id="setInvoiceStart" value="1"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3 class="settings-title">🌍 إعدادات عامة</h3>
+      <div class="form-row">
+        <label>العملة</label>
+        <select id="setCurrency" class="form-select">
+          <option value="دج">دينار جزائري (دج)</option>
+          <option value="€">يورو (€)</option>
+          <option value="$">دولار ($)</option>
+          <option value="د.م">درهم مغربي (د.م)</option>
+          <option value="ر.س">ريال سعودي (ر.س)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>اللغة</label>
+        <select id="setLanguage" class="form-select">
+          <option value="ar">العربية</option>
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="form-row cust-row-check">
+        <label>الوضع الليلي دائماً</label>
+        <input type="checkbox" id="setDarkMode" style="flex:0;width:22px;height:22px;">
+      </div>
+      <div class="form-row"><label>تنبيه المخزون المنخفض (أقل من)</label><input type="number" id="setLowStockAlert" value="5"></div>
+      <div class="form-row"><label>تنبيه الرصيد المنخفض (أقل من)</label><input type="number" id="setLowBalanceAlert" value="0"></div>
+      <div class="form-row"><label>كلمة مرور الحساسية</label><input type="password" id="setSensitivePassword" placeholder="اتركها فارغة لإلغاء"></div>
+    </div>
+
+    <button class="btn primary full" id="saveSettings">💾 حفظ الإعدادات</button>
+
+    <div class="settings-section" style="margin-top:20px;">
+      <h3 class="settings-title">ℹ️ حول التطبيق</h3>
+      <div class="about-info">
+        <p><b>SIC Enterprise</b> v1.0.0</p>
+        <p>نظام إدارة المحلات والبيع</p>
+        <p id="aboutLicense" style="color:var(--success);">✅ مُفعّل</p>
+      </div>
+
+      <div id="activationSection" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+        <div id="activationStatusBox" style="text-align:center;margin-bottom:12px;padding:14px;border-radius:12px;background:var(--card2);">
+          <small style="color:var(--muted);display:block;margin-bottom:6px;">حالة التفعيل</small>
+          <b id="activationStatusText" style="font-size:15px;">جاري الفحص...</b>
+        </div>
+
+        <div id="deviceIdBox" style="text-align:center;margin-bottom:12px;display:none;">
+          <small style="color:var(--muted);display:block;margin-bottom:6px;">معرّف هذا الجهاز</small>
+          <div style="background:var(--card2);padding:10px;border-radius:10px;font-family:monospace;font-weight:800;color:var(--primary);letter-spacing:2px;font-size:14px;word-break:break-all;" id="deviceIdValue">—</div>
+        </div>
+
+        <button class="btn primary full" id="openActivationBtn" style="display:block;">🔑 تفعيل الآن</button>
+        <button class="btn success full" id="showActivatedBtn" style="display:none;">✅ مفعّل — عرض التفاصيل</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- USERS -->
+  <section class="page" id="page-users">
+    <h2 class="page-title">👤 المستخدمين</h2>
+
+    <button class="btn primary full" id="toggleAddUser" style="margin-bottom:12px;">➕ إضافة مستخدم</button>
+
+    <div class="inv-add-panel" id="userAddPanel" style="display:none;">
+      <h3 class="form-section-title">📋 بيانات المستخدم</h3>
+      <div class="form-row"><label>اسم المستخدم *</label><input type="text" id="newUserName" autocomplete="off"></div>
+      <div class="form-row"><label>كلمة المرور *</label><input type="password" id="newUserPass" autocomplete="off"></div>
+      <div class="form-row">
+        <label>الدور</label>
+        <select id="newUserRole" class="form-select">
+          <option value="cashier">👤 كاشير</option>
+          <option value="manager">🧰 مدير مخزن</option>
+          <option value="admin">👑 مدير عام</option>
+        </select>
+      </div>
+      <div class="form-row"><label>PIN (4 أرقام) اختياري</label><input type="text" id="newUserPin" maxlength="4" inputmode="numeric"></div>
+      <button class="btn primary full" id="addUserBtn">💾 حفظ المستخدم</button>
+    </div>
+
+    <div class="list" id="userList"></div>
+  </section>
+
+</main>
+
+<!-- MODALS -->
+
+<div class="modal" id="scannerModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📷 مسح الباركود</h3>
+      <button class="icon-btn" id="closeScanner">✕</button>
+    </div>
+    <div id="qr-reader" style="width:100%;border-radius:12px;overflow:hidden;"></div>
+  </div>
+</div>
+
+<div class="modal" id="receiptModal">
+  <div class="modal-box receipt-box">
+    <div id="receiptContent" class="receipt"></div>
+    <div class="receipt-actions">
+      <button class="btn primary" id="printReceipt">🖨️ طباعة</button>
+      <button class="btn" style="background:var(--muted)" id="closeReceipt">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="payDebtModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="payDebtTitle">💳 تسديد دين</h3>
+      <button class="icon-btn" id="closePayDebt">✕</button>
+    </div>
+    <p id="payDebtInfo" style="margin-bottom:12px;color:var(--muted);font-size:13px;"></p>
+    <input type="number" id="payDebtAmount" placeholder="المبلغ" class="search-input">
+    <button class="btn success full" id="confirmPayDebt">✅ تأكيد</button>
+  </div>
+</div>
+
+<div class="modal" id="historyModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="historyTitle">📋 السجل</h3>
+      <button class="icon-btn" id="closeHistory">✕</button>
+    </div>
+    <div class="list" id="historyList"></div>
+  </div>
+</div>
+
+<div class="modal" id="statementModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="statementTitle">📄 كشف الحساب</h3>
+      <button class="icon-btn" id="closeStatement">✕</button>
+    </div>
+    <div id="statementContent"></div>
+    <div class="receipt-actions" style="margin-top:14px;">
+      <button class="btn primary" id="printStatement">🖨️ طباعة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="posHistoryModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📋 آخر الفواتير</h3>
+      <button class="icon-btn" id="closePosHistory">✕</button>
+    </div>
+    <div class="list" id="posHistoryList"></div>
+  </div>
+</div>
+
+<div class="modal" id="trialWarningModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>⏳ تنبيه</h3>
+      <button class="icon-btn" id="closeTrialWarning">✕</button>
+    </div>
+    <div id="trialWarningContent" style="text-align:center;padding:16px;"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- PWA Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((registration) => {
+          console.log('✅ SW registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.warn('❌ SW registration failed:', error);
+        });
+    });
+  }
+</script>
+
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
